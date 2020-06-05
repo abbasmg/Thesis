@@ -13,7 +13,7 @@ def load_img(path=''):
     print('The image specs are:')
     print(im.format)
     print(im.size)
-    im.show()
+    # im.show()
     gs_image = im.convert(mode='L')
     gs_image = np.array(gs_image)
     gs_image.setflags(write=1)
@@ -22,8 +22,6 @@ def load_img(path=''):
     print('The shape of the data is: '+ str(gs_image.shape))
     return gs_image
 
-path = r'C:\Users\abbme\Desktop\Sine-Wave_1000.jpg'
-gs_image=load_img(path=path)
 
 # reduce column dimension
 def reduce_coldim(data,mean_len):
@@ -36,8 +34,6 @@ def reduce_coldim(data,mean_len):
     reduced=np.stack(reduced,axis=1)
     return(reduced)  
 
-st = reduce_coldim(gs_image, 8)
-print(st.shape)
 
 def gs_to_data(gs):
     _,n = gs.shape
@@ -48,11 +44,9 @@ def gs_to_data(gs):
     for i in list(listofrow):
         data.append(np.mean(i))       
     data = np.asarray(data)
-    data = data[~np.isnan(data)]
+    data[np.isnan(data)] = 0
     data = np.interp(data, (data.min(), data.max()), (-1, +1))
     return data
-
-data = gs_to_data(gs_image)
 
 def plot_one_series(data):
     import matplotlib.pyplot as plt
@@ -79,15 +73,12 @@ def generate_arima_ts(data, n, seed=12346):
     M = []
     for i in range(n):
       noise = np.random.normal(np.mean(data),0.1,len(data))
-      nts = ts + noise
-      model = ARIMA(nts,order = (1,0,2))
-      m = model.fit(disp = 0)
+      nts = data + noise
+      try:
+          m  = ARIMA(nts,order = (1,0,2)).fit(disp = 0, transparams = False)
+      except:
+          m = ARIMA(nts,order = (1,0,2)).fit(disp = 0, start_params=[1, .1, .1, .1], transparams = False)
       M.append(m.fittedvalues)
     M = np.asarray(M)
     return M
 
-generated = generate_arima_ts(data, n= 100)
-print(generated.shape)
-
-
-plot_one_series(generated[69])
