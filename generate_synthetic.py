@@ -48,13 +48,6 @@ def gs_to_data(gs):
     data = np.interp(data, (data.min(), data.max()), (-1, +1))
     return data
 
-def plot_one_series(data):
-    import matplotlib.pyplot as plt
-    plt.plot(data)
-    plt.show()
-
-
-
  
 def generate_arima_ts(data, n, seed=12346):
     # model = ARIMA(nts, order=(1,0,2))
